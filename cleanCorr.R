@@ -62,11 +62,11 @@ cleanCorr <- function(x, target, umbral = 0.80, IV = NULL){
   # hacemos ceros en la diagonal de la matriz de correlaciones, para que cuando
   # calculemos el máximo de correlaciones de una variable no salga con ella misma
   diag(M) <- 0
-  M <- abs(M)
+
   repeat{
     
     # Obtenemos pares de variables con máxima correlación que superen el umbral
-    maxCorrByVar <- apply(M, 1, max)
+    maxCorrByVar <- apply(M, 1, function(x) max(abs(x)))
     maxCorr <- max(maxCorrByVar)
     if (maxCorr > umbral){
       varsCorr <- names(maxCorrByVar)[maxCorrByVar == maxCorr]
@@ -88,6 +88,7 @@ cleanCorr <- function(x, target, umbral = 0.80, IV = NULL){
     
   }
   
+  diag(M) <- 1
   return(list(vars_to_deleted = vars_deleted, M = M))
   
 }
