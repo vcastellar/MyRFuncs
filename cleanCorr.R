@@ -35,14 +35,20 @@ cleanCorr <- function(x, target, umbral = 0.80, IV = NULL){
   #----------------------------------------------------------------------------
   
   
+  
 
   # calcular matriz de correlaciones (M) de las variables numéricas
   # esto es, todas excepto el target
   #----------------------------------------------------------------------------
   # obtenemos data.frame de variables numéricas
-  xNum <- x[ , !names(x) %in% target]
+  numericas <- names(x)[sapply(x, class) == "numeric" | sapply(x, class) == "integer"]
+  numericas <- setdiff(numericas, target)
+  xNum <- x[ , names(x) %in% numericas]
   # calcula correlaciones
   M <- cor(xNum, use = "pairwise.complete.obs")
+  # Guardamos la matriz en un objeto auxiliar para devolverla en el return sin
+  # eliminar variables, es decir, devolvemos la matriz de correlaciones original
+  M_aux <- M
   #----------------------------------------------------------------------------
   
   
@@ -51,6 +57,11 @@ cleanCorr <- function(x, target, umbral = 0.80, IV = NULL){
   # usaremos el Information Value (IV)
   #----------------------------------------------------------------------------
   if (is.null(IV)){
+    # se necesita que el target sea binario
+    if (!is.numeric(x[target])){
+      x[ , target] <- as.integer(as.factor(x[ , target])) - 1
+    }
+    # cálculo del IV
     IV <- create_infotables(data = x, y = target)$Summary
   }
   #----------------------------------------------------------------------------
@@ -89,6 +100,6 @@ cleanCorr <- function(x, target, umbral = 0.80, IV = NULL){
   }
   
   diag(M) <- 1
-  return(list(vars_to_deleted = vars_deleted, M = M))
+  return(list(vars_to_deleted = vars_deleted, M = M, IV = IV, M_orig = M_aux))
   
 }
