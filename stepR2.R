@@ -30,7 +30,13 @@ stepR2 <- function(Null=Null, Full=Full, umbral=0.0005){
     }
 return(Null)
 }
-Null <- lm(ARR_DEL15~1,data=seleccion_stepwise)
-Full <- lm(ARR_DEL15~.,data=seleccion_stepwise)
+
+library(nycflights13)
+data(flights)
+trainIndex <- sample(1:nrow(flights), 30000)
+train <- flights[trainIndex, c("month", "dep_time", "carrier", "origin", "dest", "distance", "hour", "arr_delay")]
+test <- flights[-trainIndex, c("month", "dep_time", "carrier", "origin", "dest", "distance", "hour", "arr_delay")]
+Null <- lm(arr_delay ~ 1, data = train)
+Full <- lm(arr_delay ~ ., data = train)
 stepR2(Null,Full, umbral=0.0005)
 stepR2(Null,Full, umbral=0.00025) 
